@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,11 +8,48 @@
     <title>Temperature and Humidity</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="sensor-data">
-        <h2>Temperature: <span id="temperature">Loading...</span> °C</h2>
-        <h2>Humidity: <span id="humidity">Loading...</span> %</h2>
+    <h1>Loading...</h1>
+    <div class="container">
+        <div class="card">
+            <h2>Outside</h2>
+            <div>
+                <p>Temperature: </p>
+                <div>
+                    <p id="temp">Loading...</p>
+                    <p>°C</p>
+                </div>
+                <p>Humidity: </p>
+                <div>
+                    <p id="humidity">Loading...</p>
+                    <p>%</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Inside</h2>
+            <div>
+                <p>Temperature: </p>
+                <div>
+                    <p id="tempSensor">Loading...</p>
+                    <p>°C</p>
+                </div>
+                <p>Humidity: </p>
+                <div>
+                    <p id="humiditySensor">Loading...</p>
+                    <p>%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <p id="statement">Please connect to NodeMCU-AP WIFI(password: password123) and connect the nodeMCU to WIFI</p>
+        <button onclick="setWeatherinDOM()">Refresh Outside Weather</button>
     </div>
     <script src="script.js"></script>
 </body>
+
 </html>
