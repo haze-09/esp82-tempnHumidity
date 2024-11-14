@@ -1,10 +1,10 @@
 #include <ESP8266WiFi.h>
-#include <WiFiManager.h>  // WiFiManager for managing Wi-Fi credentials
-#include <ESP8266mDNS.h>  // mDNS for local network discovery
+#include <WiFiManager.h>  
+#include <ESP8266mDNS.h>  
 #include "DHT.h"
 
-#define DPIN 4        // Pin to connect DHT sensor (GPIO number) D2
-#define DTYPE DHT11   // Define DHT 11 or DHT22 sensor type
+#define DPIN 4        
+#define DTYPE DHT11   
 
 DHT dht(DPIN, DTYPE);
 WiFiServer server(80);
@@ -12,39 +12,33 @@ WiFiServer server(80);
 void setup() {
   Serial.begin(9600);
   dht.begin();
-
-  // Initialize WiFiManager
-  WiFiManager wifiManager;
   
-  // Uncomment to reset settings (useful for testing)
-  // wifiManager.resetSettings();
+  WiFiManager wifiManager; 
 
-  // Start WiFiManager and wait for user to input Wi-Fi credentials if none are saved
+  
   if (!wifiManager.autoConnect("NodeMCU-AP", "password123")) {
     Serial.println("Failed to connect and hit timeout.");
-    ESP.restart();  // Restart and try again
+    ESP.restart();  
   }
 
   Serial.println("WiFi connected.");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  // Start mDNS responder for local network discovery
-  if (MDNS.begin("nodemcu")) {  // Replace "nodemcu" with your desired hostname
+  
+  if (MDNS.begin("nodemcu")) {  
     Serial.println("mDNS responder started. You can access the device at http://nodemcu.local");
   } else {
     Serial.println("Error setting up mDNS responder.");
   }
-
-  // Start the HTTP server
   server.begin();
 }
 
 void loop() {
-  // Handle mDNS requests
+  
   MDNS.update();
 
-  WiFiClient client = server.available();  // Listen for incoming clients
+  WiFiClient client = server.available();  
 
   if (client) {
     Serial.println("New Client.");
@@ -53,14 +47,14 @@ void loop() {
       if (client.available()) {
         char c = client.read();
         if (c == '\n') {
-          // If a newline is found and it's an empty line, send a response
+          /
           if (currentLine.length() == 0) {
-            float tc = dht.readTemperature(false);  // Read temperature in Celsius
-            float hu = dht.readHumidity();          // Read humidity
+            float tc = dht.readTemperature(false);  
+            float hu = dht.readHumidity();         
 
             String json = "{\"temperature\":" + String(tc) + ", \"humidity\":" + String(hu) + "}";
 
-            // Send HTTP response
+            
             client.println("HTTP/1.1 200 OK");
             client.println("Content-Type: application/json");
             client.println("Access-Control-Allow-Origin: *");
@@ -80,7 +74,7 @@ void loop() {
         }
       }
     }
-    // Close the connection
+    
     client.stop();
     Serial.println("Client Disconnected.");
   }
