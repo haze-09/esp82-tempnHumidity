@@ -23,7 +23,7 @@ app.get("/api/data", (req, res) => {
     }
 });
 
-// Dialogflow webhook endpoint
+// Dialogflow webhook endpoint for English
 app.post("/api/dialogflow", (req, res) => {
     const { temperature, humidity } = mqttManager.getData();
     
@@ -34,6 +34,21 @@ app.post("/api/dialogflow", (req, res) => {
     } else {
         return res.status(200).json({
             fulfillmentText: "Sorry, sensor data is not available at the moment."
+        });
+    }
+});
+
+// Dialogflow webhook endpoint for Japanese
+app.post("/api/dialogflow/ja", (req, res) => {
+    const { temperature, humidity } = mqttManager.getData();
+    
+    if (temperature && humidity) {
+        return res.status(200).json({
+            fulfillmentText: `現在の気温は${temperature}度、湿度は${humidity}%です。`
+        });
+    } else {
+        return res.status(200).json({
+            fulfillmentText: "申し訳ありません。センサーデータが現在利用できません。"
         });
     }
 });
