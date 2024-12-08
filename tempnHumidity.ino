@@ -1,81 +1,114 @@
 #include <ESP8266WiFi.h>
-#include <WiFiManager.h>  
-#include <ESP8266mDNS.h>  
-#include "DHT.h"
+#include <WiFiManager.h>         
+#include <PubSubClient.h>        
+#include <DHT.h>                 
 
-#define DPIN 4        
-#define DTYPE DHT11   
 
-DHT dht(DPIN, DTYPE);
-WiFiServer server(80);
+#define DHTPIN 4          
+#define DHTTYPE DHT11     
+DHT dht(DHTPIN, DHTTYPE);
+
+
+IPAddress local_IP(192, 168, 1, 13);     
+IPAddress gateway(192, 168, 1, 1);        
+IPAddress subnet(255, 255, 255, 0);       
+IPAddress primaryDNS(8, 8, 8, 8);         
+IPAddress secondaryDNS(8, 8, 4, 4);       
+
+
+const char* mqttServer = "192.168.1.9";  
+const int mqttPort = 1883;
+const char* temperatureTopic = "home/temperature";
+const char* humidityTopic = "home/humidity";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
 
 void setup() {
-  Serial.begin(9600);
-  dht.begin();
-  
-  WiFiManager wifiManager; 
+  Serial.begin(115200);
 
-  
+
+  dht.begin();
+
+  WiFiManager wifiManager;
+
+
   if (!wifiManager.autoConnect("NodeMCU-AP", "password123")) {
-    Serial.println("Failed to connect and hit timeout.");
-    ESP.restart();  
+    Serial.println("Failed to connect via Wi-Fi Manager. Trying static IP...");
+    if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
+      Serial.println("Static IP configuration failed!");
+    }
+    WiFi.begin();  
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(1000);
+      Serial.print(".");
+    }
   }
 
-  Serial.println("WiFi connected.");
-  Serial.print("IP address: ");
+  Serial.println("\nWi-Fi connected!");
+  Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
 
-  
-  if (MDNS.begin("nodemcu")) {  
-    Serial.println("mDNS responder started. You can access the device at http://nodemcu.local");
-  } else {
-    Serial.println("Error setting up mDNS responder.");
-  }
-  server.begin();
+  // Initialize MQTT
+  client.setServer(mqttServer, mqttPort);
+  client.setCallback(mqttCallback);
+
+
+  connectToMQTT();
 }
 
 void loop() {
-  
-  MDNS.update();
 
-  WiFiClient client = server.available();  
-
-  if (client) {
-    Serial.println("New Client.");
-    String currentLine = "";
-    while (client.connected()) {
-      if (client.available()) {
-        char c = client.read();
-        if (c == '\n') {
-          /
-          if (currentLine.length() == 0) {
-            float tc = dht.readTemperature(false);  
-            float hu = dht.readHumidity();         
-
-            String json = "{\"temperature\":" + String(tc) + ", \"humidity\":" + String(hu) + "}";
-
-            
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-Type: application/json");
-            client.println("Access-Control-Allow-Origin: *");
-            client.println("Access-Control-Allow-Methods: GET");
-            client.println("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
-            client.println("Connection: close");
-            client.println();
-            client.println(json);
-
-            Serial.println("Sent response: " + json);
-            break;
-          } else {
-            currentLine = "";
-          }
-        } else if (c != '\r') {
-          currentLine += c;
-        }
-      }
-    }
-    
-    client.stop();
-    Serial.println("Client Disconnected.");
+  if (!client.connected()) {
+    connectToMQTT();
   }
+  client.loop();
+
+
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("Failed to read from DHT sensor!");
+  } else {
+    char tempStr[8];
+    char humidityStr[8];
+    dtostrf(temperature, 1, 2, tempStr);
+    dtostrf(humidity, 1, 2, humidityStr);
+
+    client.publish(temperatureTopic, tempStr);
+    client.publish(humidityTopic, humidityStr);
+
+    Serial.println("Published data:");
+    Serial.print("Temperature: ");
+    Serial.println(tempStr);
+    Serial.print("Humidity: ");
+    Serial.println(humidityStr);
+  }
+
+  delay(5000);  
+}
+
+void connectToMQTT() {
+  while (!client.connected()) {
+    Serial.println("Attempting MQTT connection...");
+    String clientId = "ESP8266-" + String(random(0xffff), HEX);
+    if (client.connect(clientId.c_str())) {
+      Serial.println("Connected to MQTT broker!");
+    } else {
+      Serial.print("Failed to connect, rc=");
+      Serial.print(client.state());
+      delay(5000);
+    }
+  }
+}
+
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message received on topic ");
+  Serial.print(topic);
+  Serial.print(": ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
 }
