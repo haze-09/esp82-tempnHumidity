@@ -1,22 +1,30 @@
-
 const api_url = "https://thankful-properly-meerkat.ngrok-free.app/api/data";
+let currentLanguage = "en-IN";
+let adviceData = {};
 
 async function fetchData() {
   try {
     const response = await fetch(api_url, {
       headers: {
-        'ngrok-skip-browser-warning': 'true'
-      }
+        "ngrok-skip-browser-warning": "true",
+      },
     });
-    
+
     const data = await response.json();
-    document.querySelector('#tempSensor').innerText = data.temperature;
-    document.querySelector('#humiditySensor').innerText = data.temperature;
-    document.querySelector('#statement').innerText = data.advice['en-IN'].tempAdvice + ' ' + data.advice['en-IN'].humidityAdvice;
-    
+    adviceData = data.advice;
+    document.querySelector("#tempSensor").innerText = data.temperature;
+    document.querySelector("#tempSensor").dataset.loading = "false";
+    document.querySelector("#humiditySensor").innerText = data.humidity;
+    document.querySelector("#humiditySensor").dataset.loading = "false";
+    document.querySelector("#statement").innerText =
+      data.advice[currentLanguage].tempAdvice +
+      " " +
+      data.advice[currentLanguage].humidityAdvice;
+    document.querySelector("#statement").dataset.loading = "false";
+
     console.log(data);
   } catch (error) {
-    console.error('Fetch Error:', error);
+    console.error("Fetch Error:", error);
   }
 }
 
@@ -59,8 +67,10 @@ async function getNominatimLocationName(lat, lon) {
 }
 
 function setWeatherinDOM() {
-  document.querySelector("#temp").innerText = "Loading...";
-  document.querySelector("#humidity").innerText = "Loading...";
+  document.querySelector("#temp").innerText =
+    currentLanguage === "en-IN" ? "Loading..." : "読み込み中...";
+  document.querySelector("#humidity").innerText =
+    currentLanguage === "en-IN" ? "Loading..." : "読み込み中...";
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -70,15 +80,12 @@ function setWeatherinDOM() {
         const place = await getNominatimLocationName(latitude, longitude);
         console.log(data);
         document.querySelector("h1").innerText = place;
+        document.querySelector("h1").dataset.loading = "false";
         document.querySelector("#temp").innerText = data.currentConditions.temp;
+        document.querySelector("#temp").dataset.loading = "false";
         document.querySelector("#humidity").innerText =
           data.currentConditions.humidity;
-        const sensorTemp = parseFloat(
-          document.querySelector("#tempSensor").innerText
-        );
-        const sensorHumidity = parseFloat(
-          document.querySelector("#humiditySensor").innerText
-        );
+        document.querySelector("#humidity").dataset.loading = "false";
       },
       (error) => {
         console.error("Error obtaining location:", error);
@@ -91,4 +98,26 @@ function setWeatherinDOM() {
 
 setWeatherinDOM();
 fetchData();
-setInterval(fetchData, 5000);
+setInterval(fetchData, 15000);
+
+document
+  .getElementById("languageToggle")
+  .addEventListener("change", (event) => {
+    document.querySelector("#statement").innerText =
+      adviceData[currentLanguage === "en-IN" ? "ja-JP" : "en-IN"].tempAdvice +
+      " " +
+      adviceData[currentLanguage === "en-IN" ? "ja-JP" : "en-IN"]
+        .humidityAdvice;
+
+    currentLanguage = event.target.checked ? "ja-JP" : "en-IN";
+
+    const translatableElements =
+      document.querySelectorAll("[data-en][data-ja]");
+    translatableElements.forEach((element) => {
+      if (element.dataset.loading !== "false") {
+        element.textContent = element.getAttribute(
+          `data-${currentLanguage === "en-IN" ? "en" : "ja"}`
+        );
+      }
+    });
+  });

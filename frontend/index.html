@@ -1,55 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-en="Weather Buddy" data-ja="ウェザーバディ">
+      Temperature and Humidity
+    </title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temperature and Humidity</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-    <h1>Loading...</h1>
+  <body>
+    <div class="language-toggle">
+      <input type="checkbox" id="languageToggle" class="toggle-checkbox" />
+      <label for="languageToggle" class="toggle-label">
+        <span class="toggle-inner">
+          <span class="toggle-en">EN</span>
+          <span class="toggle-ja">日本語</span>
+        </span>
+        <span class="toggle-switch"></span>
+      </label>
+    </div>
+    <h1 data-en="Loading..." data-ja="読み込み中..." data-loading="true">
+      Loading...
+    </h1>
     <div class="container">
-        <div class="card">
-            <h2>Outside</h2>
-            <div>
-                <p>Temperature: </p>
-                <div>
-                    <p id="temp">Loading...</p>
-                    <p>°C</p>
-                </div>
-                <p>Humidity: </p>
-                <div>
-                    <p id="humidity">Loading...</p>
-                    <p>%</p>
-                </div>
-            </div>
+      <div class="card">
+        <h2 data-en="Outside" data-ja="屋外">Outside</h2>
+        <div>
+          <p data-en="Temperature:" data-ja="温度:">Temperature:</p>
+          <div>
+            <p
+              id="temp"
+              data-en="Loading..."
+              data-ja="読み込み中..."
+              data-loading="true"
+            >
+              Loading...
+            </p>
+            <p>°C</p>
+          </div>
+          <p data-en="Humidity:" data-ja="湿度:" data-loading="true">
+            Humidity:
+          </p>
+          <div>
+            <p id="humidity" data-en="Loading..." data-ja="読み込み中...">
+              Loading...
+            </p>
+            <p>%</p>
+          </div>
         </div>
+      </div>
 
-        <div class="card">
-            <h2>Inside</h2>
-            <div>
-                <p>Temperature: </p>
-                <div>
-                    <p id="tempSensor">Loading...</p>
-                    <p>°C</p>
-                </div>
-                <p>Humidity: </p>
-                <div>
-                    <p id="humiditySensor">Loading...</p>
-                    <p>%</p>
-                </div>
-            </div>
+      <div class="card">
+        <h2 data-en="Inside" data-ja="屋内">Inside</h2>
+        <div>
+          <p data-en="Temperature:" data-ja="温度:">Temperature:</p>
+          <div>
+            <p
+              id="tempSensor"
+              data-en="Loading..."
+              data-ja="読み込み中..."
+              data-loading="true"
+            >
+              Loading...
+            </p>
+            <p>°C</p>
+          </div>
+          <p data-en="Humidity:" data-ja="湿度:">Humidity:</p>
+          <div>
+            <p
+              id="humiditySensor"
+              data-en="Loading..."
+              data-ja="読み込み中..."
+              data-loading="true"
+            >
+              Loading...
+            </p>
+            <p>%</p>
+          </div>
         </div>
+      </div>
     </div>
 
     <div class="card">
-        <p id="statement">Please connect to NodeMCU-AP WIFI(password: password123) and connect the nodeMCU to WIFI</p>
-        <button onclick="setWeatherinDOM()">Refresh Outside Weather</button>
+      <p
+        id="statement"
+        data-en="Please connect to NodeMCU-AP WIFI(password: password123) and connect the nodeMCU to WIFI"
+        data-ja="NodeMCU-AP WIFIに接続し(パスワード: password123)、nodeMCUをWIFIに接続してください"
+        data-loading="true"
+      >
+        Please connect to NodeMCU-AP WIFI(password: password123) and connect the
+        nodeMCU to WIFI
+      </p>
+      <button
+        onclick="setWeatherinDOM()"
+        data-en="Refresh Outside Weather"
+        data-ja="屋外の天気を更新"
+      >
+        Refresh Outside Weather
+      </button>
     </div>
     <script src="script.js"></script>
-</body>
-
+  </body>
 </html>
