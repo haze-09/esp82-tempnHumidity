@@ -45,7 +45,7 @@ async function fetchWeatherData(latitude, longitude) {
 }
 
 async function getNominatimLocationName(lat, lon) {
-  const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+  const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=${currentLanguage === 'en-IN' ? 'en' : 'ja'}`;
 
   try {
     const response = await fetch(url);
